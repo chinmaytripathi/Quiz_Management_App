@@ -1,0 +1,68 @@
+<!-- templates/user/dashboard.html -->
+{% extends "base.html" %}
+
+{% block title %}User Dashboard{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-4">Welcome, {{ session.get('username') }}</h2>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Recent Quiz Attempts</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_attempts %}
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Quiz</th>
+                                        <th>Score</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for attempt in recent_attempts %}
+                                        <tr>
+                                            <td>{{ attempt.quiz.name }}</td>
+                                            <td>{{ attempt.correct_answers }}/{{ attempt.total_questions }}</td>
+                                            <td>{{ attempt.time_stamp.strftime('%Y-%m-%d') }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p>No quiz attempts yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Available Quizzes</h5>
+                </div>
+                <div class="card-body">
+                    {% if available_quizzes %}
+                        <ul class="list-group">
+                            {% for quiz in available_quizzes %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    {{ quiz.chapter.subject.name }} - {{ quiz.chapter.name }}: {{ quiz.name }}
+                                    <a href="{{ url_for('user_quiz_attempt', quiz_id=quiz.id) }}" class="btn btn-sm btn-primary">Attempt</a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p>No available quizzes at the moment.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

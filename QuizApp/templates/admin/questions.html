@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Questions{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Questions for: {{ quiz.name }}</h2>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addQuestionModal">
+            <i class="fas fa-plus"></i> Add Question
+        </button>
+    </div>
+    
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Quiz Details</h5>
+            <p class="card-text">
+                <strong>Subject:</strong> {{ quiz.chapter.subject.name }}<br>
+                <strong>Chapter:</strong> {{ quiz.chapter.name }}<br>
+                <strong>Date:</strong> {{ quiz.date_of_quiz.strftime('%Y-%m-%d') if quiz.date_of_quiz else 'N/A' }}<br>
+                <strong>Duration:</strong> {{ quiz.time_duration.strftime('%H:%M') if quiz.time_duration else 'N/A' }}
+            </p>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-body">
+            {% if questions %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Question</th>
+                                <th>Options</th>
+                                <th>Correct Answer</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for question in questions %}
+                                <tr>
+                                    <td>{{ question.id }}</td>
+                                    <td>{{ question.question_statement }}</td>
+                                    <td>
+                                        <ol>
+                                            <li>{{ question.option1 }}</li>
+                                            <li>{{ question.option2 }}</li>
+                                            {% if question.option3 %}<li>{{ question.option3 }}</li>{% endif %}
+                                            {% if question.option4 %}<li>{{ question.option4 }}</li>{% endif %}
+                                        </ol>
+                                    </td>
+                                    <td>Option {{ question.correct_option }}</td>
+                                    <td>
+                                        <a href="#" class="btn btn-sm btn-info">Edit</a>
+                                        <a href="{{ url_for('delete_question', id=question.id) }}" 
+                                           class="btn btn-sm btn-danger" 
+                                           onclick="return confirm('Are you sure?')">Delete</a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-center">No questions found for this quiz.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Add Question Modal -->
+<div class="modal fade" id="addQuestionModal" tabindex="-1" aria-labelledby="addQuestionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addQuestionModalLabel">Add New Question</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="{{ url_for('admin_questions', quiz_id=quiz.id) }}">
+                    {{ form.hidden_tag() }}
+                    <div class="mb-3">
+                        {{ form.question_statement.label(class="form-label") }}
+                        {{ form.question_statement(class="form-control", rows=3) }}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.option1.label(class="form-label") }}
+                        {{ form.option1(class="form-control") }}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.option2.label(class="form-label") }}
+                        {{ form.option2(class="form-control") }}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.option3.label(class="form-label") }}
+                        {{ form.option3(class="form-control") }}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.option4.label(class="form-label") }}
+                        {{ form.option4(class="form-control") }}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.correct_option.label(class="form-label") }}
+                        {{ form.correct_option(class="form-select") }}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        {{ form.submit(class="btn btn-primary") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

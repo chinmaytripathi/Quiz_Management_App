@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Quizzes{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Manage Quizzes</h2>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addQuizModal">
+            <i class="fas fa-plus"></i> Add Quiz
+        </button>
+    </div>
+    
+    <div class="card">
+        <div class="card-body">
+            {% if quizzes %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Chapter</th>
+                                <th>Subject</th>
+                                <th>Date</th>
+                                <th>Duration</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for quiz in quizzes %}
+                                <tr>
+                                    <td>{{ quiz.id }}</td>
+                                    <td>{{ quiz.name }}</td>
+                                    <td>{{ quiz.chapter.name }}</td>
+                                    <td>{{ quiz.chapter.subject.name }}</td>
+                                    <td>{{ quiz.date_of_quiz.strftime('%Y-%m-%d') if quiz.date_of_quiz else 'N/A' }}</td>
+                                    <td>{{ quiz.time_duration.strftime('%H:%M') if quiz.time_duration else 'N/A' }}</td>
+                                    <td>
+                                        <a href="{{ url_for('admin_questions', quiz_id=quiz.id) }}" 
+                                           class="btn btn-sm btn-success">Questions</a>
+                                        <a href="#" class="btn btn-sm btn-info">Edit</a>
+                                        <a href="{{ url_for('delete_quiz', id=quiz.id) }}" 
+                                           class="btn btn-sm btn-danger" 
+                                           onclick="return confirm('Are you sure?')">Delete</a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-center">No quizzes found.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Add Quiz Modal -->
+<div class="modal fade" id="addQuizModal" tabindex="-1" aria-labelledby="addQuizModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addQuizModalLabel">Add New Quiz</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="{{ url_for('admin_quizzes') }}">
+                    {{ form.hidden_tag() }}
+                    <div class="mb-3">
+                        {{ form.name.label(class="form-label") }}
+                        {{ form.name(class="form-control") }}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.chapter_id.label(class="form-label") }}
+                        {{ form.chapter_id(class="form-select") }}
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.date_of_quiz.label(class="form-label") }}
+                            {{ form.date_of_quiz(class="form-control") }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form.time_duration.label(class="form-label") }}
+                            {{ form.time_duration(class="form-control") }}
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        {{ form.remarks.label(class="form-label") }}
+                        {{ form.remarks(class="form-control", rows=3) }}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        {{ form.submit(class="btn btn-primary") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

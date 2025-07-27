@@ -1,0 +1,162 @@
+<!-- templates/admin/dashboard.html -->
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-4">Admin Dashboard</h2>
+    
+    <div class="row">
+        <div class="col-md-3 mb-4">
+            <div class="card text-white bg-primary">
+                <div class="card-body">
+                    <h5 class="card-title">Subjects</h5>
+                    <p class="card-text display-4">{{ subjects }}</p>
+                    <a href="{{ url_for('admin_subjects') }}" class="text-white">View Subjects</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card text-white bg-success">
+                <div class="card-body">
+                    <h5 class="card-title">Chapters</h5>
+                    <p class="card-text display-4">{{ chapters }}</p>
+                    <a href="{{ url_for('admin_chapters') }}" class="text-white">View Chapters</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card text-white bg-info">
+                <div class="card-body">
+                    <h5 class="card-title">Quizzes</h5>
+                    <p class="card-text display-4">{{ quizzes }}</p>
+                    <a href="{{ url_for('admin_quizzes') }}" class="text-white">View Quizzes</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card text-white bg-warning">
+                <div class="card-body">
+                    <h5 class="card-title">Users</h5>
+                    <p class="card-text display-4">{{ users }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Activities Section -->
+<div class="col-md-6">
+    <div class="card">
+        <div class="card-header">
+            <h5>Recent Activities</h5>
+        </div>
+        <div class="card-body">
+            {% if recent_attempts %}
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Quiz</th>
+                                <th>Score</th>
+                                <th>When</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for attempt in recent_attempts %}
+                            <tr>
+                                <td>{{ attempt.username }}</td>
+                                <td>{{ attempt.quiz_name }}</td>
+                                <td>{{ attempt.Score.correct_answers }}/{{ attempt.Score.total_questions }}</td>
+                                <td>{{ attempt.Score.time_stamp.strftime('%m/%d %H:%M') }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-muted">No recent activities found.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Section -->
+<div class="col-md-6">
+    <div class="card">
+        <div class="card-header">
+            <h5>Statistics</h5>
+        </div>
+        <div class="card-body">
+            {% if quiz_stats %}
+                <canvas id="statsChart" width="400" height="200"></canvas>
+                <div class="mt-3">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Quiz</th>
+                                <th>Attempts</th>
+                                <th>Avg Score</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for stat in quiz_stats %}
+                            <tr>
+                                <td>{{ stat.name }}</td>
+                                <td>{{ stat.attempts }}</td>
+                                <td>{{ "%.1f"|format(stat.avg_score) }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-muted">No statistics available yet.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+</div>
+{% block extra_js %}
+<script>
+window.onload = function() {
+    const ctx = document.getElementById('statsChart');
+    if (ctx) {
+        const statsChart = new Chart(ctx.getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: ['Subjects', 'Chapters', 'Quizzes', 'Users'],
+                datasets: [{
+                    label: 'Count',
+                    data: JSON.parse('{{ [subjects, chapters, quizzes, users] | default([0,0,0,0]) | tojson }}'),
+                    backgroundColor: [
+                        'rgba(13, 110, 253, 0.7)',
+                        'rgba(25, 135, 84, 0.7)',
+                        'rgba(13, 202, 240, 0.7)',
+                        'rgba(255, 193, 7, 0.7)'
+                    ],
+                    borderColor: [
+                        'rgba(13, 110, 253, 1)',
+                        'rgba(25, 135, 84, 1)',
+                        'rgba(13, 202, 240, 1)',
+                        'rgba(255, 193, 7, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    } else {
+        console.error("Element with ID 'statsChart' not found.");
+    }
+};
+</script>
+{% endblock %}
+{% endblock %}
